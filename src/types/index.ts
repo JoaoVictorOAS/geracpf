@@ -33,6 +33,7 @@ export interface ScanStats {
 }
 
 export interface MessagePayload {
-  action: 'TRIGGER_SCAN' | 'GET_SETTINGS' | 'SETTINGS_UPDATED' | 'UPDATE_STATS' | 'GET_STATS';
+  action: 'TRIGGER_SCAN' | 'GET_SETTINGS' | 'SETTINGS_UPDATED' | 'UPDATE_STATS' | 'GET_STATS' | 'CONTEXT_MENU_ACTION';
+  command?: string;
   data?: any;
 }

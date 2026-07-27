@@ -4,7 +4,7 @@ import { getFormattedValue } from '../formatter/mask';
 /**
  * Safely sets value on HTMLInputElement supporting React, Vue, Angular synthetic state trackers.
  */
-function setNativeInputValue(element: HTMLInputElement, value: string) {
+export function setNativeInputValue(element: HTMLInputElement, value: string) {
   const valueSetter = Object.getOwnPropertyDescriptor(element, 'value')?.set;
   const prototypeValueSetter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
@@ -29,7 +29,7 @@ function setNativeInputValue(element: HTMLInputElement, value: string) {
 /**
  * Highlights filled element with a brief non-intrusive glow
  */
-function highlightFilledElement(element: HTMLInputElement) {
+export function highlightFilledElement(element: HTMLInputElement) {
   const originalTransition = element.style.transition;
   const originalOutline = element.style.outline;
   const originalBoxShadow = element.style.boxShadow;
@@ -43,6 +43,11 @@ function highlightFilledElement(element: HTMLInputElement) {
     element.style.boxShadow = originalBoxShadow;
     element.style.transition = originalTransition;
   }, 1200);
+}
+
+export function fillInputElement(element: HTMLInputElement, value: string): void {
+  setNativeInputValue(element, value);
+  highlightFilledElement(element);
 }
 
 export function fillField(detection: DetectionResult, settings: ExtensionSettings): boolean {

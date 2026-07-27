@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if ((input as any)._hasLogger) return;
       (input as any)._hasLogger = true;
 
-      ['input', 'change', 'blur'].forEach((eventType) => {
+      ['input', 'change', 'blur', 'contextmenu'].forEach((eventType) => {
         input.addEventListener(eventType, () => {
           appendLog(`Evento [${eventType}] disparado em #${input.id || input.name || 'input'} | Valor: "${input.value}"`, 'event');
         });

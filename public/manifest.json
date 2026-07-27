@@ -26,7 +26,8 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "contextMenus"
   ],
   "icons": {
     "16": "icons/icon16.png",
