@@ -27,22 +27,15 @@ export function setNativeInputValue(element: HTMLInputElement, value: string) {
 }
 
 /**
- * Highlights filled element with a brief non-intrusive glow
+ * Marks a filled element with a brief outline so the user sees what changed.
  */
 export function highlightFilledElement(element: HTMLInputElement) {
-  const originalTransition = element.style.transition;
   const originalOutline = element.style.outline;
-  const originalBoxShadow = element.style.boxShadow;
-
-  element.style.transition = 'all 0.3s ease';
-  element.style.outline = '2px solid #6366f1';
-  element.style.boxShadow = '0 0 10px rgba(99, 102, 241, 0.4)';
+  element.style.outline = '2px solid #157347';
 
   setTimeout(() => {
     element.style.outline = originalOutline;
-    element.style.boxShadow = originalBoxShadow;
-    element.style.transition = originalTransition;
-  }, 1200);
+  }, 1000);
 }
 
 export function fillInputElement(element: HTMLInputElement, value: string): void {
