@@ -80,3 +80,4 @@ A extensão utiliza um sistema de pesos cumulativos para determinar se um elemen
    * Console em tempo real registrando o disparo dos eventos sintéticos.
 # geracpf
 # geracpf
+# geracpf
