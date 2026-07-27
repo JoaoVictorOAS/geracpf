@@ -1,7 +1,21 @@
 # Extensão Chrome para Autopreenchimento de CPF/CNPJ
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 Extensão para **Google Chrome (Manifest V3)** em **TypeScript** e **Vite** que identifica e preenche
 campos de CPF e CNPJ em páginas web e SPAs (React, Vue, Angular, Svelte).
+
+## Sumário
+
+* [Funcionalidades](#funcionalidades)
+* [Estrutura do projeto](#estrutura-do-projeto)
+* [Regras de pontuação do detector](#regras-de-pontuação-do-detector)
+* [Instalação no Google Chrome](#instalação-no-google-chrome)
+* [Contribuindo](#contribuindo)
+* [Licença](#licença)
 
 ## Funcionalidades
 
@@ -56,3 +70,12 @@ Threshold padrão: **7 pontos** (ajustável na tela de opções).
 3. Ative o **Modo do desenvolvedor**.
 4. Clique em **Carregar sem compactação**.
 5. Selecione a pasta `dist/` gerada.
+
+## Contribuindo
+
+Contribuições são bem-vindas! Veja o guia em [CONTRIBUTING.md](CONTRIBUTING.md) para instruções de
+setup, padrão de commits e como reportar bugs ou sugerir melhorias.
+
+## Licença
+
+Distribuído sob a licença [MIT](LICENSE).
