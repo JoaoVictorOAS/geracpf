@@ -79,3 +79,4 @@ A extensão utiliza um sistema de pesos cumulativos para determinar se um elemen
    * Botão para **Injetar Componentes Dinâmicos (SPA / React)**.
    * Console em tempo real registrando o disparo dos eventos sintéticos.
 # geracpf
+# geracpf
