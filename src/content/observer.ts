@@ -10,6 +10,13 @@ export function setupDOMObserver(onMutationDetected: () => void, debounceMs = 40
     observer.disconnect();
   }
 
+  // document.body pode não existir (documentos não-HTML, body removido por script)
+  const root = document.body || document.documentElement;
+  if (!root) {
+    observer = null;
+    return;
+  }
+
   observer = new MutationObserver((mutations) => {
     let shouldScan = false;
 
@@ -36,7 +43,7 @@ export function setupDOMObserver(onMutationDetected: () => void, debounceMs = 40
     }
   });
 
-  observer.observe(document.body, {
+  observer.observe(root, {
     childList: true,
     subtree: true
   });

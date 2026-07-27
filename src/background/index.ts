@@ -8,7 +8,7 @@ function createContextMenuItems() {
     // Parent Context Menu
     chrome.contextMenus.create({
       id: 'gerar_cpf_cnpj_root',
-      title: 'Gerar / Preencher CPF/CNPJ',
+      title: 'CPF / CNPJ',
       contexts: ['editable', 'page']
     });
 
@@ -16,21 +16,21 @@ function createContextMenuItems() {
     chrome.contextMenus.create({
       id: 'fill_generated_cpf',
       parentId: 'gerar_cpf_cnpj_root',
-      title: '👤 Gerar e Preencher CPF Válido',
+      title: 'Gerar e preencher CPF',
       contexts: ['editable', 'page']
     });
 
     chrome.contextMenus.create({
       id: 'fill_generated_cnpj',
       parentId: 'gerar_cpf_cnpj_root',
-      title: '🏢 Gerar e Preencher CNPJ Válido',
+      title: 'Gerar e preencher CNPJ',
       contexts: ['editable', 'page']
     });
 
     chrome.contextMenus.create({
       id: 'fill_saved_data',
       parentId: 'gerar_cpf_cnpj_root',
-      title: '⚡ Preencher com Dados Salvos',
+      title: 'Preencher com dados salvos',
       contexts: ['editable', 'page']
     });
 
@@ -44,14 +44,14 @@ function createContextMenuItems() {
     chrome.contextMenus.create({
       id: 'copy_generated_cpf',
       parentId: 'gerar_cpf_cnpj_root',
-      title: '📋 Gerar e Copiar CPF',
+      title: 'Gerar e copiar CPF',
       contexts: ['editable', 'page']
     });
 
     chrome.contextMenus.create({
       id: 'copy_generated_cnpj',
       parentId: 'gerar_cpf_cnpj_root',
-      title: '📋 Gerar e Copiar CNPJ',
+      title: 'Gerar e copiar CNPJ',
       contexts: ['editable', 'page']
     });
   });

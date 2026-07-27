@@ -3,10 +3,7 @@ import { formatCPF, formatCNPJ, generateValidCPF, generateValidCNPJ } from '../u
 import { ExtensionSettings } from '../types';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // DOM Elements
-  const mainToggle = document.getElementById('mainToggle') as HTMLInputElement;
-  const statusBadge = document.getElementById('statusBadge') as HTMLElement;
-  const statusText = document.getElementById('statusText') as HTMLElement;
+  const enabledToggle = document.getElementById('enabledToggle') as HTMLInputElement;
   const runScanBtn = document.getElementById('runScanBtn') as HTMLButtonElement;
   const fieldsFound = document.getElementById('fieldsFound') as HTMLElement;
   const fieldsFilled = document.getElementById('fieldsFilled') as HTMLElement;
@@ -16,28 +13,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   const genCpfBtn = document.getElementById('genCpfBtn') as HTMLButtonElement;
   const genCnpjBtn = document.getElementById('genCnpjBtn') as HTMLButtonElement;
 
-  const autoFillToggle = document.getElementById('autoFillToggle') as HTMLInputElement;
   const overwriteToggle = document.getElementById('overwriteToggle') as HTMLInputElement;
   const detectNewToggle = document.getElementById('detectNewToggle') as HTMLInputElement;
   const applyMaskToggle = document.getElementById('applyMaskToggle') as HTMLInputElement;
 
   const saveBtn = document.getElementById('saveBtn') as HTMLButtonElement;
-  const openTestPageBtn = document.getElementById('openTestPageBtn') as HTMLButtonElement;
   const openOptionsBtn = document.getElementById('openOptionsBtn') as HTMLButtonElement;
-  const toast = document.getElementById('toast') as HTMLElement;
+  const status = document.getElementById('status') as HTMLElement;
 
-  // Load Initial Settings & Stats
   const settings = await getSettings();
   const stats = await getStats();
 
-  // Populate UI
-  mainToggle.checked = settings.enabled;
-  updateStatusUI(settings.enabled);
+  enabledToggle.checked = settings.enabled;
 
   cpfInput.value = settings.cpf ? formatCPF(settings.cpf) : '';
   cnpjInput.value = settings.cnpj ? formatCNPJ(settings.cnpj) : '';
 
-  autoFillToggle.checked = settings.enabled;
   overwriteToggle.checked = settings.overwriteExisting;
   detectNewToggle.checked = settings.detectNewElements;
   applyMaskToggle.checked = settings.applyMask;
@@ -45,46 +36,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   fieldsFound.textContent = stats.fieldsFound.toString();
   fieldsFilled.textContent = stats.fieldsFilled.toString();
 
-  // Formatter input mask listeners
-  cpfInput.addEventListener('input', (e) => {
-    const val = (e.target as HTMLInputElement).value;
-    cpfInput.value = formatCPF(val);
+  cpfInput.addEventListener('input', () => {
+    cpfInput.value = formatCPF(cpfInput.value);
   });
 
-  cnpjInput.addEventListener('input', (e) => {
-    const val = (e.target as HTMLInputElement).value;
-    cnpjInput.value = formatCNPJ(val);
+  cnpjInput.addEventListener('input', () => {
+    cnpjInput.value = formatCNPJ(cnpjInput.value);
   });
 
-  // Generator Buttons
   genCpfBtn.addEventListener('click', () => {
-    const raw = generateValidCPF();
-    cpfInput.value = formatCPF(raw);
-    showToast('CPF válido gerado!');
+    cpfInput.value = formatCPF(generateValidCPF());
+    showStatus('CPF gerado.');
   });
 
   genCnpjBtn.addEventListener('click', () => {
-    const raw = generateValidCNPJ();
-    cnpjInput.value = formatCNPJ(raw);
-    showToast('CNPJ válido gerado!');
+    cnpjInput.value = formatCNPJ(generateValidCNPJ());
+    showStatus('CNPJ gerado.');
   });
 
-  // Main Enable Toggle
-  mainToggle.addEventListener('change', () => {
-    const enabled = mainToggle.checked;
-    autoFillToggle.checked = enabled;
-    updateStatusUI(enabled);
-  });
-
-  autoFillToggle.addEventListener('change', () => {
-    mainToggle.checked = autoFillToggle.checked;
-    updateStatusUI(autoFillToggle.checked);
-  });
-
-  // Save Settings Action
   saveBtn.addEventListener('click', async () => {
     const newSettings: Partial<ExtensionSettings> = {
-      enabled: mainToggle.checked,
+      enabled: enabledToggle.checked,
       cpf: cpfInput.value.replace(/\D/g, ''),
       cnpj: cnpjInput.value.replace(/\D/g, ''),
       overwriteExisting: overwriteToggle.checked,
@@ -94,63 +66,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await saveSettings(newSettings);
 
-    // Notify active tabs
     if (typeof chrome !== 'undefined' && chrome.runtime) {
       chrome.runtime.sendMessage({ action: 'SETTINGS_UPDATED' });
     }
 
-    showToast('Configurações salvas!');
+    showStatus('Configurações salvas.');
   });
 
-  // Manual Trigger Scan Button
   runScanBtn.addEventListener('click', async () => {
-    if (typeof chrome !== 'undefined' && chrome.tabs) {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab && tab.id) {
-        if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:'))) {
-          showToast('Página do sistema não suportada');
-          return;
-        }
+    if (typeof chrome === 'undefined' || !chrome.tabs) {
+      showStatus('Indisponível fora do Chrome.');
+      return;
+    }
 
-        try {
-          await chrome.tabs.sendMessage(tab.id, { action: 'TRIGGER_SCAN' });
-          showToast('Varredura executada!');
-        } catch (err) {
-          // Content script not present in active tab, attempt dynamic injection
-          try {
-            if (chrome.scripting) {
-              await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['content/index.js']
-              });
-              await chrome.tabs.sendMessage(tab.id, { action: 'TRIGGER_SCAN' });
-              showToast('Varredura executada!');
-            } else {
-              showToast('Recarregue a página para ativar.');
-            }
-          } catch (injectErr) {
-            showToast('Recarregue a página para ativar.');
-          }
-        }
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) return;
 
-        setTimeout(async () => {
-          const updatedStats = await getStats();
-          fieldsFound.textContent = updatedStats.fieldsFound.toString();
-          fieldsFilled.textContent = updatedStats.fieldsFilled.toString();
-        }, 300);
+    if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:'))) {
+      showStatus('Página do sistema não suportada.');
+      return;
+    }
+
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action: 'TRIGGER_SCAN' });
+      showStatus('Varredura executada.');
+    } catch {
+      // Content script not present in active tab, attempt dynamic injection
+      try {
+        if (!chrome.scripting) throw new Error('scripting indisponível');
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['content/index.js']
+        });
+        await chrome.tabs.sendMessage(tab.id, { action: 'TRIGGER_SCAN' });
+        showStatus('Varredura executada.');
+      } catch {
+        showStatus('Recarregue a página para ativar.');
       }
-    } else {
-      showToast('Modo de demonstração');
     }
-  });
 
-  // Navigation Links
-  openTestPageBtn.addEventListener('click', () => {
-    if (typeof chrome !== 'undefined' && chrome.tabs) {
-      chrome.tabs.create({ url: chrome.runtime.getURL('test/test-page.html') });
-    } else {
-      window.open('../test/test-page.html', '_blank');
-    }
+    setTimeout(async () => {
+      const updatedStats = await getStats();
+      fieldsFound.textContent = updatedStats.fieldsFound.toString();
+      fieldsFilled.textContent = updatedStats.fieldsFilled.toString();
+    }, 300);
   });
 
   openOptionsBtn.addEventListener('click', () => {
@@ -161,21 +120,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  function updateStatusUI(enabled: boolean) {
-    if (enabled) {
-      statusBadge.classList.remove('disabled');
-      statusText.textContent = 'Extensão Ativa';
-    } else {
-      statusBadge.classList.add('disabled');
-      statusText.textContent = 'Extensão Desativada';
-    }
-  }
-
-  function showToast(msg: string) {
-    toast.textContent = msg;
-    toast.classList.add('show');
+  function showStatus(msg: string) {
+    status.textContent = msg;
     setTimeout(() => {
-      toast.classList.remove('show');
-    }, 2000);
+      if (status.textContent === msg) {
+        status.textContent = '';
+      }
+    }, 2500);
   }
 });
