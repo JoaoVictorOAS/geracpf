@@ -6,12 +6,15 @@ let activeToast: HTMLElement | null = null;
 let hideTimer: number | undefined;
 
 export function showToastNotification(message: string): void {
+  const root = document.body || document.documentElement;
+  if (!root) return;
+
   ensureUIStyles();
 
   if (!activeToast) {
     activeToast = document.createElement('div');
     activeToast.className = 'cpf-cnpj-toast';
-    document.body.appendChild(activeToast);
+    root.appendChild(activeToast);
   }
 
   activeToast.textContent = message;
@@ -45,5 +48,5 @@ function ensureUIStyles(): void {
     }
   `;
 
-  document.head.appendChild(style);
+  (document.head || document.documentElement).appendChild(style);
 }

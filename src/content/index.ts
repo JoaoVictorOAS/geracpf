@@ -102,8 +102,17 @@ async function runContextMenuCommand(command?: string) {
   }
 }
 
+/**
+ * Respostas de API (JSON, XML, texto puro) não têm formulário para preencher.
+ * O content script roda em <all_urls>, então essas páginas são ignoradas.
+ */
+function isFillableDocument(): boolean {
+  const type = (document.contentType || 'text/html').toLowerCase();
+  return type === 'text/html' || type === 'application/xhtml+xml';
+}
+
 async function runAutoFillProcess() {
-  if (isScanning) return;
+  if (isScanning || !isFillableDocument()) return;
   isScanning = true;
 
   try {
@@ -151,34 +160,41 @@ async function runAutoFillProcess() {
 }
 
 // Listen to runtime messages from Popup / Service Worker / Context Menu
-if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id && chrome.runtime.onMessage) {
   chrome.runtime.onMessage.addListener((message: MessagePayload, _sender, sendResponse) => {
-    if (message.action === 'TRIGGER_SCAN') {
-      runAutoFillProcess().then(() => {
-        sendResponse({ success: true });
-      });
+    // Sem o catch, um contexto de extensão invalidado vira "Uncaught (in promise)"
+    const respond = (task: Promise<unknown>) => {
+      task
+        .catch((err) => {
+          console.debug('[CPF/CNPJ Extension] Command error:', err);
+        })
+        .then(() => {
+          try {
+            sendResponse({ success: true });
+          } catch {
+            // A aba pode ter sido fechada antes da resposta
+          }
+        });
       return true;
-    }
-    if (message.action === 'SETTINGS_UPDATED') {
-      runAutoFillProcess().then(() => {
-        sendResponse({ success: true });
-      });
-      return true;
+    };
+
+    if (message.action === 'TRIGGER_SCAN' || message.action === 'SETTINGS_UPDATED') {
+      return respond(runAutoFillProcess());
     }
     if (message.action === 'CONTEXT_MENU_ACTION') {
-      runContextMenuCommand(message.command).then(() => {
-        sendResponse({ success: true });
-      });
-      return true;
+      return respond(runContextMenuCommand(message.command));
     }
+    return false;
   });
 }
 
 // Initial execution when document is idle
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  runAutoFillProcess();
-} else {
-  window.addEventListener('DOMContentLoaded', () => {
+if (isFillableDocument()) {
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
     runAutoFillProcess();
-  });
+  } else {
+    window.addEventListener('DOMContentLoaded', () => {
+      runAutoFillProcess();
+    });
+  }
 }
