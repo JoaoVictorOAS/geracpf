@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações - Extensão CPF/CNPJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/options-BrALpK0G.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-CSyFcu_0.js">
+  <link rel="stylesheet" crossorigin href="/assets/options-DgAfO0Lj.css">
+</head>
+<body>
+  <div class="options-layout">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="m9 15 2 2 4-4"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Painel de Configurações Avançadas</h1>
+          <p>Gerencie regras de detecção, listas de domínios e preferências da extensão.</p>
+        </div>
+      </div>
+      <button id="openTestBtn" class="btn-secondary">Abrir Página de Testes</button>
+    </header>
+
+    <main class="content-grid">
+      <!-- Section 1: Detection Algorithm & Threshold -->
+      <section class="card">
+        <h2>Sensibilidade da Detecção</h2>
+        <p class="description">Ajuste o pontuação mínima necessária para um campo ser identificado como CPF ou CNPJ.</p>
+        
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Score Mínimo Exigido:</span>
+            <strong id="scoreThresholdVal">7 pontos</strong>
+          </div>
+          <input type="range" id="scoreThresholdInput" min="4" max="15" step="1" value="7">
+          <div class="slider-legend">
+            <span>Mais Sensível (4 - pode pegar falsos positivos)</span>
+            <span>Rigoroso (15 - exige múltiplos atributos)</span>
+          </div>
+        </div>
+
+        <div class="rules-table">
+          <h3>Tabela de Pesos do Algoritmo</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Peso</th>
+                <th>Exemplos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>autocomplete</code></td>
+                <td><span class="badge high">+10</span></td>
+                <td>cpf, cnpj, tax-id</td>
+              </tr>
+              <tr>
+                <td><code>label</code> associado</td>
+                <td><span class="badge med">+5</span></td>
+                <td>&lt;label&gt;CPF&lt;/label&gt;, &lt;label&gt;CNPJ&lt;/label&gt;</td>
+              </tr>
+              <tr>
+                <td><code>placeholder</code></td>
+                <td><span class="badge med">+5</span></td>
+                <td>999.999.999-99, Digite seu CPF</td>
+              </tr>
+              <tr>
+                <td><code>name</code> / <code>id</code></td>
+                <td><span class="badge med">+5</span></td>
+                <td>cpf, cnpj_empresa, documento</td>
+              </tr>
+              <tr>
+                <td><code>aria-label</code> / <code>data-*</code></td>
+                <td><span class="badge low">+4</span></td>
+                <td>data-mask="cpf"</td>
+              </tr>
+              <tr>
+                <td><code>maxlength</code></td>
+                <td><span class="badge low">+2</span></td>
+                <td>maxlength=11, maxlength=14, maxlength=18</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 2: Domain Filtering -->
+      <section class="card">
+        <h2>Filtro de Domínios</h2>
+        <p class="description">Configure onde a extensão deve ou não funcionar.</p>
+
+        <div class="form-field">
+          <label for="allowedDomainsInput">Lista Branca (Permitir apenas nestes domínios)</label>
+          <small>Digite os domínios separados por vírgula. Deixe em branco para permitir todos.</small>
+          <input type="text" id="allowedDomainsInput" placeholder="empresa.com.br, homologacao.local">
+        </div>
+
+        <div class="form-field">
+          <label for="blockedDomainsInput">Lista Negra (Bloquear nestes domínios)</label>
+          <small>Domínios onde a extensão NUNCA irá preencher.</small>
+          <input type="text" id="blockedDomainsInput" placeholder="banco.com.br, checkout-sensivel.com">
+        </div>
+      </section>
+
+      <!-- Section 3: Generator & Validator Sandbox -->
+      <section class="card">
+        <h2>Gerador e Validador Rápido</h2>
+        <p class="description">Gere números válidos para testes ou valide documentos existentes.</p>
+
+        <div class="sandbox-grid">
+          <div class="sandbox-box">
+            <h3>Testar CPF</h3>
+            <div class="input-inline">
+              <input type="text" id="testCpfInput" placeholder="Digite para validar">
+              <button id="validateCpfBtn" class="btn-small">Validar</button>
+            </div>
+            <div id="cpfValResult" class="val-result"></div>
+          </div>
+
+          <div class="sandbox-box">
+            <h3>Testar CNPJ</h3>
+            <div class="input-inline">
+              <input type="text" id="testCnpjInput" placeholder="Digite para validar">
+              <button id="validateCnpjBtn" class="btn-small">Validar</button>
+            </div>
+            <div id="cnpjValResult" class="val-result"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-bar">
+      <button id="saveOptionsBtn" class="btn-primary">Salvar Todas as Configurações</button>
+      <span id="saveStatus" class="save-status"></span>
+    </footer>
+  </div>
+
+</body>
+</html>

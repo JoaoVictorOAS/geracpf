@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autopreenchimento CPF/CNPJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/popup-DCRmgduT.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-CSyFcu_0.js">
+  <link rel="stylesheet" crossorigin href="/assets/popup-DrHhwXOb.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="m9 15 2 2 4-4"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>CPF / CNPJ</h1>
+          <span class="subtitle">Autopreenchimento</span>
+        </div>
+      </div>
+      <label class="toggle-switch" title="Ativar/Desativar extensão">
+        <input type="checkbox" id="mainToggle">
+        <span class="slider"></span>
+      </label>
+    </header>
+
+    <!-- Status Card -->
+    <section class="card status-card">
+      <div class="status-header">
+        <div class="status-indicator" id="statusBadge">
+          <span class="dot"></span>
+          <span class="text" id="statusText">Extensão Ativa</span>
+        </div>
+        <button id="runScanBtn" class="btn-scan" title="Executar varredura na página atual">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Preencher
+        </button>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-item">
+          <span class="metric-value" id="fieldsFound">0</span>
+          <span class="metric-label">Encontrados</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value filled" id="fieldsFilled">0</span>
+          <span class="metric-label">Preenchidos</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Document Setup -->
+    <section class="card form-card">
+      <h2>Documentos Salvos</h2>
+      
+      <div class="input-group">
+        <label for="cpfInput">CPF Principal</label>
+        <div class="input-wrapper">
+          <input type="text" id="cpfInput" placeholder="000.000.000-00" maxlength="14" autocomplete="off">
+          <button type="button" id="genCpfBtn" class="btn-gen" title="Gerar CPF Válido">Gerar</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="cnpjInput">CNPJ Principal</label>
+        <div class="input-wrapper">
+          <input type="text" id="cnpjInput" placeholder="00.000.000/0000-00" maxlength="18" autocomplete="off">
+          <button type="button" id="genCnpjBtn" class="btn-gen" title="Gerar CNPJ Válido">Gerar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preferences Checklist -->
+    <section class="card prefs-card">
+      <h2>Preferências</h2>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoFillToggle">
+        <span class="custom-checkbox"></span>
+        <span>Preencher automaticamente</span>
+      </label>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="overwriteToggle">
+        <span class="custom-checkbox"></span>
+        <span>Sobrescrever campos preenchidos</span>
+      </label>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="detectNewToggle">
+        <span class="custom-checkbox"></span>
+        <span>Detectar novos elementos (SPA / React)</span>
+      </label>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="applyMaskToggle">
+        <span class="custom-checkbox"></span>
+        <span>Aplicar máscara de formatação</span>
+      </label>
+    </section>
+
+    <!-- Footer / Actions -->
+    <footer class="footer">
+      <button id="saveBtn" class="btn-primary">
+        <span>Salvar Configurações</span>
+      </button>
+      <div class="footer-links">
+        <button id="openTestPageBtn" class="btn-link">Página de Teste</button>
+        <button id="openOptionsBtn" class="btn-link">Opções Avançadas</button>
+      </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Configurações salvas!</div>
+  </div>
+
+</body>
+</html>

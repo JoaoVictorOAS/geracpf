@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página de Testes - Extensão Autopreenchimento CPF/CNPJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/test-DgUwicBg.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-CSyFcu_0.js">
+  <link rel="modulepreload" crossorigin href="/assets/filler-lNDf9P1y.js">
+  <link rel="stylesheet" crossorigin href="/assets/test-BJfo7eQR.css">
+</head>
+<body>
+  <div class="test-container">
+    <header class="test-header">
+      <div class="brand">
+        <div class="badge">TEST SUITE</div>
+        <h1>Página de Testes e Homologação de Formulários</h1>
+        <p>Valide o comportamento da extensão em múltiplos cenários reais, formulários SPA, React e campos com restrições.</p>
+      </div>
+      <div class="controls">
+        <button id="manualScanBtn" class="btn-primary">Executar Varredura Local</button>
+        <button id="clearInputsBtn" class="btn-secondary">Limpar Todos os Campos</button>
+      </div>
+    </header>
+
+    <div class="test-grid">
+      <!-- Test Form 1: Standard CPF & CNPJ -->
+      <section class="test-card">
+        <h2>1. Formulário Convencional (CPF & CNPJ Separados)</h2>
+        <p class="desc">Campos padrões identificáveis por id, name, label e placeholder.</p>
+        
+        <form onsubmit="return false;">
+          <div class="field-group">
+            <label for="cpf">CPF do Cliente:</label>
+            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" autocomplete="cpf">
+          </div>
+
+          <div class="field-group">
+            <label for="cnpjEmpresa">CNPJ da Empresa:</label>
+            <input type="text" id="cnpjEmpresa" name="cnpjEmpresa" placeholder="00.000.000/0000-00" autocomplete="cnpj">
+          </div>
+        </form>
+      </section>
+
+      <!-- Test Form 2: Unified CPF/CNPJ & Custom Data Attributes -->
+      <section class="test-card">
+        <h2>2. Campo Único (CPF/CNPJ Combinado)</h2>
+        <p class="desc">Detecta a intenção pelo placeholder "CPF/CNPJ" e maxlength.</p>
+        
+        <form onsubmit="return false;">
+          <div class="field-group">
+            <label for="documento">CPF / CNPJ do Titular:</label>
+            <input type="text" id="documento" name="documento" placeholder="Digite seu CPF ou CNPJ" maxlength="18">
+          </div>
+
+          <div class="field-group">
+            <label>Campo com data-mask="cpf":</label>
+            <input type="text" id="campoDataMask" data-mask="cpf" placeholder="Informe o documento">
+          </div>
+        </form>
+      </section>
+
+      <!-- Test Form 3: Special Cases (Pre-filled, Disabled, Readonly) -->
+      <section class="test-card">
+        <h2>3. Casos Especiais & Restrições</h2>
+        <p class="desc">Valida se a extensão respeita valores existentes, readonly e desabilitados.</p>
+        
+        <form onsubmit="return false;">
+          <div class="field-group">
+            <label for="cpfPrePreenchido">CPF Já Preenchido (Não deve sobrescrever):</label>
+            <input type="text" id="cpfPrePreenchido" name="cpf" value="111.222.333-44">
+          </div>
+
+          <div class="field-group">
+            <label for="cpfDesabilitado">CPF Desabilitado (Ignorar):</label>
+            <input type="text" id="cpfDesabilitado" name="cpf" placeholder="000.000.000-00" disabled>
+          </div>
+
+          <div class="field-group">
+            <label for="cnpjReadonly">CNPJ Somente Leitura (Ignorar):</label>
+            <input type="text" id="cnpjReadonly" name="cnpj" placeholder="00.000.000/0000-00" readonly>
+          </div>
+        </form>
+      </section>
+
+      <!-- Test Form 4: SPA / Dynamic Form (MutationObserver) -->
+      <section class="test-card">
+        <h2>4. Aplicação SPA (React / Angular / Vue)</h2>
+        <p class="desc">Simulação de inserção dinâmica de componentes no DOM.</p>
+
+        <div class="spa-actions">
+          <button id="injectSpaFormBtn" class="btn-action">+ Injetar Modal Dinâmico com Inputs</button>
+        </div>
+
+        <div id="spaContainer" class="spa-container">
+          <!-- Dynamic inputs will be rendered here -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Live Event Log -->
+    <section class="test-card full-width">
+      <h2>Log de Eventos e Preenchimentos em Tempo Real</h2>
+      <p class="desc">Registra todos os disparos de eventos <code>input</code>, <code>change</code> e <code>blur</code> para verificar integração com frameworks reativos.</p>
+      
+      <div class="log-console" id="logConsole">
+        <div class="log-entry info">Sistema de teste inicializado. Aguardando interações...</div>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>
