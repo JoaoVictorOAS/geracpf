@@ -57,12 +57,55 @@ function createContextMenuItems() {
   });
 }
 
+/**
+ * Safely send message to a tab, dynamically injecting content script if missing on eligible tabs.
+ */
+async function sendMessageToTab(tabId: number, tabUrl: string | undefined, message: MessagePayload): Promise<void> {
+  if (tabUrl && (tabUrl.startsWith('chrome://') || tabUrl.startsWith('chrome-extension://') || tabUrl.startsWith('edge://') || tabUrl.startsWith('about:'))) {
+    return;
+  }
+
+  try {
+    await chrome.tabs.sendMessage(tabId, message);
+  } catch (err) {
+    // Receiving end does not exist - attempt dynamic injection of content script
+    try {
+      if (chrome.scripting) {
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          files: ['content/index.js']
+        });
+        await chrome.tabs.sendMessage(tabId, message);
+      }
+    } catch (injectErr) {
+      console.debug('[CPF/CNPJ Extension] Could not send message or inject script into tab:', tabId, injectErr);
+    }
+  }
+}
+
 // Handle extension lifecycle events
 if (typeof chrome !== 'undefined' && chrome.runtime) {
   chrome.runtime.onInstalled.addListener(async () => {
     console.log('[CPF/CNPJ Extension] Extension installed / updated.');
     await getSettings(); // Ensure defaults are written to storage
     createContextMenuItems();
+
+    // Inject content script into already open web tabs upon installation/reload
+    try {
+      const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+      for (const tab of tabs) {
+        if (tab.id) {
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['content/index.js']
+          }).catch(() => {
+            // Ignore restricted or unscriptable tabs
+          });
+        }
+      }
+    } catch (err) {
+      console.debug('[CPF/CNPJ Extension] Could not auto-inject into open tabs:', err);
+    }
   });
 
   if (chrome.runtime.onStartup) {
@@ -75,11 +118,9 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
   if (chrome.contextMenus && chrome.contextMenus.onClicked) {
     chrome.contextMenus.onClicked.addListener((info, tab) => {
       if (tab?.id) {
-        chrome.tabs.sendMessage(tab.id, {
+        sendMessageToTab(tab.id, tab.url, {
           action: 'CONTEXT_MENU_ACTION',
-          command: info.menuItemId
-        }).catch((err) => {
-          console.warn('[CPF/CNPJ Extension] Could not send message to tab:', err);
+          command: String(info.menuItemId)
         });
       }
     });
@@ -90,9 +131,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     if (message.action === 'SETTINGS_UPDATED') {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0] && tabs[0].id) {
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'SETTINGS_UPDATED' }).catch(() => {
-            // Ignore error if tab doesn't have content script injected
-          });
+          sendMessageToTab(tabs[0].id, tabs[0].url, { action: 'SETTINGS_UPDATED' });
         }
       });
       sendResponse({ status: 'notified' });
@@ -100,4 +139,5 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     return true;
   });
 }
+
 

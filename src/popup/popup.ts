@@ -103,20 +103,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Manual Trigger Scan Button
-  runScanBtn.addEventListener('click', () => {
+  runScanBtn.addEventListener('click', async () => {
     if (typeof chrome !== 'undefined' && chrome.tabs) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0] && tabs[0].id) {
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'TRIGGER_SCAN' }, async () => {
-            showToast('Varredura executada!');
-            setTimeout(async () => {
-              const updatedStats = await getStats();
-              fieldsFound.textContent = updatedStats.fieldsFound.toString();
-              fieldsFilled.textContent = updatedStats.fieldsFilled.toString();
-            }, 300);
-          });
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && tab.id) {
+        if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:'))) {
+          showToast('Página do sistema não suportada');
+          return;
         }
-      });
+
+        try {
+          await chrome.tabs.sendMessage(tab.id, { action: 'TRIGGER_SCAN' });
+          showToast('Varredura executada!');
+        } catch (err) {
+          // Content script not present in active tab, attempt dynamic injection
+          try {
+            if (chrome.scripting) {
+              await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['content/index.js']
+              });
+              await chrome.tabs.sendMessage(tab.id, { action: 'TRIGGER_SCAN' });
+              showToast('Varredura executada!');
+            } else {
+              showToast('Recarregue a página para ativar.');
+            }
+          } catch (injectErr) {
+            showToast('Recarregue a página para ativar.');
+          }
+        }
+
+        setTimeout(async () => {
+          const updatedStats = await getStats();
+          fieldsFound.textContent = updatedStats.fieldsFound.toString();
+          fieldsFilled.textContent = updatedStats.fieldsFilled.toString();
+        }, 300);
+      }
     } else {
       showToast('Modo de demonstração');
     }
