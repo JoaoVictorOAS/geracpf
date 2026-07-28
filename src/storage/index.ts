@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: ExtensionSettings = {
   overwriteExisting: false,
   detectNewElements: true,
   applyMask: true,
+  cnpjAlphanumeric: false,
   scoreThreshold: 7,
   allowedDomains: [],
   blockedDomains: []

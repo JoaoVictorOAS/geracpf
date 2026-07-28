@@ -1,5 +1,13 @@
 import { getSettings, saveSettings, getStats } from '../storage';
-import { formatCPF, formatCNPJ, generateValidCPF, generateValidCNPJ } from '../utils/cpf-cnpj';
+import {
+  cleanAlphanumeric,
+  formatCPF,
+  formatCNPJ,
+  formatCNPJAlphanumeric,
+  generateValidCPF,
+  generateValidCNPJ,
+  generateValidAlphanumericCNPJ
+} from '../utils/cpf-cnpj';
 import { ExtensionSettings } from '../types';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -12,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cnpjInput = document.getElementById('cnpjInput') as HTMLInputElement;
   const genCpfBtn = document.getElementById('genCpfBtn') as HTMLButtonElement;
   const genCnpjBtn = document.getElementById('genCnpjBtn') as HTMLButtonElement;
+  const cnpjAlphanumericToggle = document.getElementById('cnpjAlphanumericToggle') as HTMLInputElement;
 
   const overwriteToggle = document.getElementById('overwriteToggle') as HTMLInputElement;
   const detectNewToggle = document.getElementById('detectNewToggle') as HTMLInputElement;
@@ -27,7 +36,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   enabledToggle.checked = settings.enabled;
 
   cpfInput.value = settings.cpf ? formatCPF(settings.cpf) : '';
-  cnpjInput.value = settings.cnpj ? formatCNPJ(settings.cnpj) : '';
+  cnpjAlphanumericToggle.checked = settings.cnpjAlphanumeric;
+  cnpjInput.value = settings.cnpj
+    ? (settings.cnpjAlphanumeric ? formatCNPJAlphanumeric(settings.cnpj) : formatCNPJ(settings.cnpj))
+    : '';
 
   overwriteToggle.checked = settings.overwriteExisting;
   detectNewToggle.checked = settings.detectNewElements;
@@ -41,7 +53,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   cnpjInput.addEventListener('input', () => {
-    cnpjInput.value = formatCNPJ(cnpjInput.value);
+    cnpjInput.value = cnpjAlphanumericToggle.checked
+      ? formatCNPJAlphanumeric(cnpjInput.value)
+      : formatCNPJ(cnpjInput.value);
+  });
+
+  cnpjAlphanumericToggle.addEventListener('change', () => {
+    // Reformata o valor atual ao trocar de modo, sem descartar o que já foi digitado/gerado.
+    cnpjInput.value = cnpjAlphanumericToggle.checked
+      ? formatCNPJAlphanumeric(cnpjInput.value)
+      : formatCNPJ(cnpjInput.value);
   });
 
   genCpfBtn.addEventListener('click', () => {
@@ -50,7 +71,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   genCnpjBtn.addEventListener('click', () => {
-    cnpjInput.value = formatCNPJ(generateValidCNPJ());
+    cnpjInput.value = cnpjAlphanumericToggle.checked
+      ? formatCNPJAlphanumeric(generateValidAlphanumericCNPJ())
+      : formatCNPJ(generateValidCNPJ());
     showStatus('CNPJ gerado.');
   });
 
@@ -58,10 +81,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const newSettings: Partial<ExtensionSettings> = {
       enabled: enabledToggle.checked,
       cpf: cpfInput.value.replace(/\D/g, ''),
-      cnpj: cnpjInput.value.replace(/\D/g, ''),
+      cnpj: cnpjAlphanumericToggle.checked ? cleanAlphanumeric(cnpjInput.value) : cnpjInput.value.replace(/\D/g, ''),
       overwriteExisting: overwriteToggle.checked,
       detectNewElements: detectNewToggle.checked,
-      applyMask: applyMaskToggle.checked
+      applyMask: applyMaskToggle.checked,
+      cnpjAlphanumeric: cnpjAlphanumericToggle.checked
     };
 
     await saveSettings(newSettings);

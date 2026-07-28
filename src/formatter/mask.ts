@@ -1,8 +1,16 @@
-import { cleanDigits, formatCPF, formatCNPJ } from '../utils/cpf-cnpj';
+import { cleanAlphanumeric, cleanDigits, formatCNPJ, formatCNPJAlphanumeric, formatCPF } from '../utils/cpf-cnpj';
 import { DocumentType } from '../types';
 
-export function getFormattedValue(rawDigits: string, targetType: DocumentType, applyMask: boolean): string {
-  const digits = cleanDigits(rawDigits);
+export function getFormattedValue(rawValue: string, targetType: DocumentType, applyMask: boolean): string {
+  // O CNPJ alfanumérico (Receita Federal, a partir de 2026) mistura letras e números,
+  // então usa uma limpeza que preserva letras em vez de descartá-las como \D.
+  if (targetType === 'cnpj' && /[A-Za-z]/.test(rawValue)) {
+    const chars = cleanAlphanumeric(rawValue);
+    if (!chars) return '';
+    return applyMask ? formatCNPJAlphanumeric(chars) : chars.slice(0, 14);
+  }
+
+  const digits = cleanDigits(rawValue);
   if (!digits) return '';
 
   if (!applyMask) {
