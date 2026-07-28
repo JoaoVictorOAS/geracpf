@@ -3,7 +3,7 @@ import { fillField, fillInputElement } from './filler';
 import { getSettings, updateStats } from '../storage';
 import { setupDOMObserver, stopDOMObserver } from './observer';
 import { MessagePayload } from '../types';
-import { generateValidCPF, generateValidCNPJ } from '../utils/cpf-cnpj';
+import { generateValidCPF, generateValidCNPJ, generateValidAlphanumericCNPJ } from '../utils/cpf-cnpj';
 import { getFormattedValue } from '../formatter/mask';
 import { showToastNotification } from './ui';
 
@@ -52,8 +52,8 @@ function getTargetInput(): HTMLInputElement | null {
   return null;
 }
 
-function generateFormatted(docType: 'cpf' | 'cnpj', applyMask: boolean): string {
-  const raw = docType === 'cpf' ? generateValidCPF() : generateValidCNPJ();
+function generateFormatted(docType: 'cpf' | 'cnpj', applyMask: boolean, cnpjAlphanumeric: boolean): string {
+  const raw = docType === 'cpf' ? generateValidCPF() : (cnpjAlphanumeric ? generateValidAlphanumericCNPJ() : generateValidCNPJ());
   return getFormattedValue(raw, docType, applyMask);
 }
 
@@ -71,10 +71,12 @@ async function runContextMenuCommand(command?: string) {
 
   switch (command) {
     case 'fill_generated_cpf':
-    case 'fill_generated_cnpj': {
+    case 'fill_generated_cnpj':
+    case 'fill_generated_cnpj_alphanumeric': {
       const docType = command === 'fill_generated_cpf' ? 'cpf' : 'cnpj';
-      const label = docType.toUpperCase();
-      const val = generateFormatted(docType, settings.applyMask);
+      const alphanumeric = command === 'fill_generated_cnpj_alphanumeric';
+      const label = alphanumeric ? 'CNPJ alfanumérico' : docType.toUpperCase();
+      const val = generateFormatted(docType, settings.applyMask, alphanumeric);
       const target = getTargetInput();
 
       if (target) {
@@ -86,10 +88,13 @@ async function runContextMenuCommand(command?: string) {
       break;
     }
     case 'copy_generated_cpf':
-    case 'copy_generated_cnpj': {
+    case 'copy_generated_cnpj':
+    case 'copy_generated_cnpj_alphanumeric': {
       const docType = command === 'copy_generated_cpf' ? 'cpf' : 'cnpj';
-      const val = generateFormatted(docType, settings.applyMask);
-      await copyToClipboard(docType.toUpperCase(), val);
+      const alphanumeric = command === 'copy_generated_cnpj_alphanumeric';
+      const label = alphanumeric ? 'CNPJ alfanumérico' : docType.toUpperCase();
+      const val = generateFormatted(docType, settings.applyMask, alphanumeric);
+      await copyToClipboard(label, val);
       break;
     }
     case 'fill_saved_data': {

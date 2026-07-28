@@ -27,6 +27,8 @@ campos de CPF e CNPJ em páginas web e SPAs (React, Vue, Angular, Svelte).
 * **MutationObserver:** detecta campos criados dinamicamente (modais, wizards, etapas) com debounce.
 * **Respeito a campos preenchidos:** não sobrescreve valores existentes por padrão.
 * **Gerador de documentos válidos:** gera CPFs e CNPJs válidos para ambientes de teste.
+* **CNPJ alfanumérico:** opção para gerar CNPJs no novo formato da Receita Federal (letras e números,
+  válido a partir de julho de 2026), com o mesmo cálculo de dígitos verificadores (mód. 11).
 * **Menu de contexto:** gerar e preencher, ou gerar e copiar, direto pelo botão direito.
 
 ## Estrutura do projeto

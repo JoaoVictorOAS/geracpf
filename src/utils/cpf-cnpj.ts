@@ -26,6 +26,26 @@ export function formatCNPJ(value: string): string {
   return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12, 14)}`;
 }
 
+// Remove all characters except digits and uppercase letters (used for alphanumeric CNPJ)
+export function cleanAlphanumeric(value: string): string {
+  return (value || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+}
+
+// Format raw 14-char alphanumeric string to CNPJ format AA.AAA.AAA/AAAA-99
+export function formatCNPJAlphanumeric(value: string): string {
+  const chars = cleanAlphanumeric(value).slice(0, 14);
+  if (chars.length <= 2) return chars;
+  if (chars.length <= 5) return `${chars.slice(0, 2)}.${chars.slice(2)}`;
+  if (chars.length <= 8) return `${chars.slice(0, 2)}.${chars.slice(2, 5)}.${chars.slice(5)}`;
+  if (chars.length <= 12) return `${chars.slice(0, 2)}.${chars.slice(2, 5)}.${chars.slice(5, 8)}/${chars.slice(8)}`;
+  return `${chars.slice(0, 2)}.${chars.slice(2, 5)}.${chars.slice(5, 8)}/${chars.slice(8, 12)}-${chars.slice(12, 14)}`;
+}
+
+// Value of a CNPJ character (digit or uppercase letter) for check-digit math, per Receita Federal (ASCII code - 48)
+function cnpjCharValue(char: string): number {
+  return char.charCodeAt(0) - 48;
+}
+
 // Check standard CPF validity using mathematical checksum verification
 export function isValidCPF(cpf: string): boolean {
   const digits = cleanDigits(cpf);
@@ -76,6 +96,32 @@ export function isValidCNPJ(cnpj: string): boolean {
   return true;
 }
 
+// Check alphanumeric CNPJ validity (base+order: 0-9/A-Z, check digits: always numeric)
+export function isValidAlphanumericCNPJ(cnpj: string): boolean {
+  const chars = cleanAlphanumeric(cnpj);
+  if (chars.length !== 14) return false;
+  if (!/^[0-9A-Z]{12}\d{2}$/.test(chars)) return false;
+  if (/^(.)\1{13}$/.test(chars)) return false;
+
+  const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += cnpjCharValue(chars.charAt(i)) * weights1[i];
+  }
+  let rev = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (rev !== parseInt(chars.charAt(12), 10)) return false;
+
+  const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  sum = 0;
+  for (let i = 0; i < 13; i++) {
+    sum += cnpjCharValue(chars.charAt(i)) * weights2[i];
+  }
+  rev = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (rev !== parseInt(chars.charAt(13), 10)) return false;
+
+  return true;
+}
+
 // Generate a valid random CPF string for testing
 export function generateValidCPF(): string {
   const rnd = (n: number) => Math.round(Math.random() * n);
@@ -107,4 +153,22 @@ export function generateValidCNPJ(): string {
   let d2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
   return `${n.join('')}${d1}${d2}`;
+}
+
+// Generate a valid random alphanumeric CNPJ (base+order: 0-9/A-Z, per Receita Federal's new format)
+export function generateValidAlphanumericCNPJ(): string {
+  const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const rndChar = () => alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+  const base = Array.from({ length: 8 }, rndChar).concat(['0', '0', '0', '1']); // Base + branch 0001
+
+  const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  let sum = base.reduce((total, char, index) => total + cnpjCharValue(char) * weights1[index], 0);
+  const d1 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+
+  const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  const baseWithD1 = [...base, String(d1)];
+  sum = baseWithD1.reduce((total, char, index) => total + cnpjCharValue(char) * weights2[index], 0);
+  const d2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+
+  return `${base.join('')}${d1}${d2}`;
 }
