@@ -71,10 +71,12 @@ async function runContextMenuCommand(command?: string) {
 
   switch (command) {
     case 'fill_generated_cpf':
-    case 'fill_generated_cnpj': {
+    case 'fill_generated_cnpj':
+    case 'fill_generated_cnpj_alphanumeric': {
       const docType = command === 'fill_generated_cpf' ? 'cpf' : 'cnpj';
-      const label = docType.toUpperCase();
-      const val = generateFormatted(docType, settings.applyMask, settings.cnpjAlphanumeric);
+      const alphanumeric = command === 'fill_generated_cnpj_alphanumeric';
+      const label = alphanumeric ? 'CNPJ alfanumérico' : docType.toUpperCase();
+      const val = generateFormatted(docType, settings.applyMask, alphanumeric);
       const target = getTargetInput();
 
       if (target) {
@@ -86,10 +88,13 @@ async function runContextMenuCommand(command?: string) {
       break;
     }
     case 'copy_generated_cpf':
-    case 'copy_generated_cnpj': {
+    case 'copy_generated_cnpj':
+    case 'copy_generated_cnpj_alphanumeric': {
       const docType = command === 'copy_generated_cpf' ? 'cpf' : 'cnpj';
-      const val = generateFormatted(docType, settings.applyMask, settings.cnpjAlphanumeric);
-      await copyToClipboard(docType.toUpperCase(), val);
+      const alphanumeric = command === 'copy_generated_cnpj_alphanumeric';
+      const label = alphanumeric ? 'CNPJ alfanumérico' : docType.toUpperCase();
+      const val = generateFormatted(docType, settings.applyMask, alphanumeric);
+      await copyToClipboard(label, val);
       break;
     }
     case 'fill_saved_data': {

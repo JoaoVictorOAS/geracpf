@@ -28,6 +28,13 @@ function createContextMenuItems() {
     });
 
     chrome.contextMenus.create({
+      id: 'fill_generated_cnpj_alphanumeric',
+      parentId: 'gerar_cpf_cnpj_root',
+      title: 'Gerar e preencher CNPJ alfanumérico',
+      contexts: ['editable', 'page']
+    });
+
+    chrome.contextMenus.create({
       id: 'fill_saved_data',
       parentId: 'gerar_cpf_cnpj_root',
       title: 'Preencher com dados salvos',
@@ -52,6 +59,13 @@ function createContextMenuItems() {
       id: 'copy_generated_cnpj',
       parentId: 'gerar_cpf_cnpj_root',
       title: 'Gerar e copiar CNPJ',
+      contexts: ['editable', 'page']
+    });
+
+    chrome.contextMenus.create({
+      id: 'copy_generated_cnpj_alphanumeric',
+      parentId: 'gerar_cpf_cnpj_root',
+      title: 'Gerar e copiar CNPJ alfanumérico',
       contexts: ['editable', 'page']
     });
   });
